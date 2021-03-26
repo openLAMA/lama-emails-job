@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Authors>Prime Holding</Authors>
+    <Product>Elyon.Fastly</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Copyright>Prime Holding</Copyright>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+    <PackageReference Include="Prime.Sdk.RestClientFactory" Version="1.1.2" />
+    <PackageReference Include="refit" Version="5.1.67" />
+  </ItemGroup>
+
+</Project>

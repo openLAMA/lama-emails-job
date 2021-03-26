@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <StartupObject>Elyon.Fastly.EmailJob.Program</StartupObject>
+    <Company>Prime Holding</Company>
+    <Authors>Prime Holding</Authors>
+    <Copyright>Prime Holding</Copyright>
+    <Description></Description>
+    <Product>Elyon.Fastly</Product>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AssemblyName>Elyon.Fastly.EmailJob</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Prime.Sdk" Version="2.1.2" />
+    <PackageReference Include="Prime.Sdk.ConfigReader" Version="1.0.2" />
+    <PackageReference Include="Prime.Sdk.Logging" Version="4.0.9" />
+
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\client\Elyon.Fastly.EmailJob.RestClient\Elyon.Fastly.EmailJob.RestClient.csproj" />
+    <ProjectReference Include="..\Elyon.Fastly.EmailJob.DomainServices\Elyon.Fastly.EmailJob.DomainServices.csproj" />
+    <ProjectReference Include="..\Elyon.Fastly.EmailJob.PostgresRepositories\Elyon.Fastly.EmailJob.PostgresRepositories.csproj" />
+  </ItemGroup>
+
+</Project>
