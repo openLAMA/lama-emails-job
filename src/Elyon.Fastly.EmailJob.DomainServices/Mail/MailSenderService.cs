@@ -17,6 +17,7 @@
 // along with this program.  If not, see https://www.gnu.org/licenses/.
 #endregion
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Elyon.Fastly.EmailJob.Domain.Dtos;
 using MailKit.Security;
@@ -35,17 +36,33 @@ namespace Elyon.Fastly.EmailJob.DomainServices.Mail
             _mailSettings = mailSettings;
         }
 
-        public async Task SendMessageAsync(string receiver, string subject, string body)
+        public async Task SendMessageAsync(string receiver, string ccReceivers, string subject, string body, ICollection<AttachmentDto> attachments)
         {
             var message = new MimeMessage();
             message.From.Add(MailboxAddress.Parse(_mailSettings.Sender));
             message.To.Add(MailboxAddress.Parse(receiver));
+            if (!string.IsNullOrWhiteSpace(ccReceivers))
+            {
+                IEnumerable<string> ccReceiversList = ccReceivers.Split(';', System.StringSplitOptions.RemoveEmptyEntries);
+                foreach (var ccReceiver in ccReceiversList)
+                {
+                    message.Cc.Add(MailboxAddress.Parse(ccReceiver));
+                }
+            }
             message.Subject = subject;
 
-            message.Body = new TextPart("html")
+            var bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = body;
+
+            if (attachments != default && attachments.Count > 0)
             {
-                Text = body
-            };
+                foreach (var attachment in attachments)
+                {
+                    bodyBuilder.Attachments.Add(attachment.FileName, attachment.Content);
+                }
+            }
+
+            message.Body = bodyBuilder.ToMessageBody();
 
             using (var mailClient = _mailClientFactory.CreateMailClient())
             {

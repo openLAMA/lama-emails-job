@@ -27,12 +27,18 @@ namespace Elyon.Fastly.EmailJob.Domain.Dtos
 
         public string Receiver { get; set; }
 
+        public string CcReceivers { get; set; }
+
         public string Subject { get; set; }
 
         public string Content { get; set; }
 
 #pragma warning disable CA2227 // Collection properties should be read only - can be easily populated from db
         public Dictionary<string, string> Parameters { get; set; }
+#pragma warning restore CA2227 // Collection properties should be read only
+
+#pragma warning disable CA2227 // Collection properties should be read only
+        public ICollection<AttachmentDto> Attachments { get; set; }
 #pragma warning restore CA2227 // Collection properties should be read only
     }
 }

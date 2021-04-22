@@ -39,11 +39,37 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.2");
 
+            modelBuilder.Entity("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.Attachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OriginalXXHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Attachments");
+                });
+
             modelBuilder.Entity("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.Email", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CcReceivers")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp without time zone");
@@ -75,6 +101,27 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
                     b.HasIndex("TemplateId");
 
                     b.ToTable("Emails");
+                });
+
+            modelBuilder.Entity("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.EmailAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AttachmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EmailId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttachmentId");
+
+                    b.HasIndex("EmailId");
+
+                    b.ToTable("EmailAttachments");
                 });
 
             modelBuilder.Entity("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.EmailParameter", b =>
@@ -142,6 +189,25 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
                     b.Navigation("Template");
                 });
 
+            modelBuilder.Entity("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.EmailAttachment", b =>
+                {
+                    b.HasOne("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.Attachment", "Attachment")
+                        .WithMany()
+                        .HasForeignKey("AttachmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.Email", "Email")
+                        .WithMany("Attachments")
+                        .HasForeignKey("EmailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attachment");
+
+                    b.Navigation("Email");
+                });
+
             modelBuilder.Entity("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.EmailParameter", b =>
                 {
                     b.HasOne("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.Email", "Email")
@@ -155,6 +221,8 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
 
             modelBuilder.Entity("Elyon.Fastly.EmailJob.PostgresRepositories.Entities.Email", b =>
                 {
+                    b.Navigation("Attachments");
+
                     b.Navigation("Parameters");
                 });
 

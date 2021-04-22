@@ -17,12 +17,14 @@
 // along with this program.  If not, see https://www.gnu.org/licenses/.
 #endregion
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Elyon.Fastly.EmailJob.Domain.Dtos;
 
 namespace Elyon.Fastly.EmailJob.DomainServices.Mail
 {
     public interface IMailSenderService
     {
-        public Task SendMessageAsync(string receiver, string subject, string body);
+        public Task SendMessageAsync(string receiver, string ccReceivers, string subject, string body, ICollection<AttachmentDto> attachments);
     }
 }

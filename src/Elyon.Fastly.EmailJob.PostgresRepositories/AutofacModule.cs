@@ -62,6 +62,10 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                 .As<IEmailsRepository>()
                 .SingleInstance();
 
+            builder.RegisterType<AttachmentsRepository>()
+                .As<IAttachmentsRepository>()
+                .SingleInstance();
+
             builder.RegisterType<AESCryptography>()
                 .As<IAESCryptography>()
                 .SingleInstance()
