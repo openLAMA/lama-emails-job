@@ -22,15 +22,17 @@ using System;
 using Elyon.Fastly.EmailJob.PostgresRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
 {
     [DbContext(typeof(EmailJobContext))]
-    partial class EmailJobContextModelSnapshot : ModelSnapshot
+    [Migration("20210421083936_AddEmailCcReceivers")]
+    partial class AddEmailCcReceivers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

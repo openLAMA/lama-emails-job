@@ -37,9 +37,10 @@ namespace Elyon.Fastly.EmailJob.DomainServices
         private readonly IAESCryptography _aesCryptography;
         private readonly IMailSenderService _mailSender;
         private readonly ILog _log;
+        private readonly IAttachmentsService _attachmentsService;
 
         public EmailsService(IEmailsRepository repository, IAESCryptography aesCryptography, 
-            IMailSenderService mailSender, ILogFactory logFactory)
+            IMailSenderService mailSender, ILogFactory logFactory, IAttachmentsService attachmentsService)
         {
             if (logFactory == null)
                 throw new ArgumentNullException(nameof(logFactory));
@@ -48,6 +49,7 @@ namespace Elyon.Fastly.EmailJob.DomainServices
             _aesCryptography = aesCryptography;
             _mailSender = mailSender;
             _log = logFactory.CreateLog(this);
+            _attachmentsService = attachmentsService;
         }
 
         public async Task<ICollection<EmailDto>> GetUnsentEmailsAsync()
@@ -57,11 +59,23 @@ namespace Elyon.Fastly.EmailJob.DomainServices
                 .ConfigureAwait(false);
         }
 
-        public async Task SendEmail(string receiver, string templateName, Dictionary<string, string> parameters)
+        public async Task SendEmail(string receiver, ICollection<string> ccReceivers, string templateName, ICollection<string> attachmentFilesHashes, Dictionary<string, string> parameters)
         {
+            var attachmentsIds = new List<Guid>();
+            if (attachmentFilesHashes != default && attachmentFilesHashes.Any())
+            {
+                _log.Info($"Get attachmentsIds for attachment files \"{string.Join(", ", attachmentFilesHashes)}\", template \"{templateName}\"");
+                attachmentsIds = await _attachmentsService.GetAttachmentsIds(attachmentFilesHashes).ConfigureAwait(false);
+                if (attachmentFilesHashes.Count != attachmentsIds.Count)
+                {
+                    _log.Error($"Email not added to queue - not all attachments have been found in the DB. Attachments files hashes count: {attachmentFilesHashes.Count}, files in DB count: {attachmentsIds.Count}");
+                    return;
+                }
+            }
+
             _log.Info($"New email queued for send with template \"{templateName}\"");
             await _repository
-                .AddEmailToQueueAsync(receiver, templateName, parameters)
+                .AddEmailToQueueAsync(receiver, ccReceivers, templateName, attachmentsIds, parameters)
                 .ConfigureAwait(false);
         }
 
@@ -78,7 +92,7 @@ namespace Elyon.Fastly.EmailJob.DomainServices
 
                 try
                 {
-                    await _mailSender.SendMessageAsync(email.Receiver, subject, content).ConfigureAwait(false);
+                    await _mailSender.SendMessageAsync(email.Receiver, email.CcReceivers, subject, content, email.Attachments).ConfigureAwait(false);
 
                     await _repository.MarkMailAsProcessedAsync(email.Id, true, null)
                         .ConfigureAwait(false);

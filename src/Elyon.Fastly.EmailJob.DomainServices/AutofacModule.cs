@@ -50,6 +50,10 @@ namespace Elyon.Fastly.EmailJob.DomainServices
                 .As<IEmailsService>()
                 .SingleInstance();
 
+            builder.RegisterType<AttachmentsService>()
+                .As<IAttachmentsService>()
+                .SingleInstance();
+
             builder.RegisterMailClient(() => new SmtpClient());
         }
     }

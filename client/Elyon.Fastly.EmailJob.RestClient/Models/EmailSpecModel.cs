@@ -25,7 +25,11 @@ namespace Elyon.Fastly.EmailJob.RestClient.Models
     {
         public string Receiver { get; set; }
 
+        public ICollection<string> CcReceivers { get; set; }
+
         public string TemplateName { get; set; }
+
+        public ICollection<string> AttachmentFilesHashes { get; set; }
 
         public Dictionary<string, string> Parameters { get; set; }
     }

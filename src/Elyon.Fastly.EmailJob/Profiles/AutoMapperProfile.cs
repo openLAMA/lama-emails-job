@@ -19,6 +19,7 @@
 
 using AutoMapper;
 using Elyon.Fastly.EmailJob.Domain.Dtos;
+using Elyon.Fastly.EmailJob.RestClient.Models;
 using Elyon.Fastly.EmailJob.Settings;
 
 namespace Elyon.Fastly.EmailJob.Profiles
@@ -28,6 +29,8 @@ namespace Elyon.Fastly.EmailJob.Profiles
         public AutoMapperProfile()
         {
             CreateMap<MailSettings, MailSettingsDto>();
+            CreateMap<FileInfoDto, FileInfoModel>();
+            CreateMap<FileInfoDto, FileInfoModelWithoutContent>();
         }
     }
 }

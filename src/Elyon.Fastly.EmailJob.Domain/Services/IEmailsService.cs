@@ -27,7 +27,7 @@ namespace Elyon.Fastly.EmailJob.Domain.Services
     {
         Task<ICollection<EmailDto>> GetUnsentEmailsAsync();
 
-        Task SendEmail(string receiver, string templateName, Dictionary<string, string> parameters);
+        Task SendEmail(string receiver, ICollection<string> ccReceivers, string templateName, ICollection<string> attachmentFilesHashes, Dictionary<string, string> parameters);
 
         Task SendUnsentEmailsAsync();
     }

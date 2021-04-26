@@ -120,5 +120,79 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Helpers
 
             return plaintext;
         }
+
+        byte[] IAESCryptography.Decrypt(byte[] cipherBytes)
+        {
+            if (string.IsNullOrEmpty(_encryptionKey))
+            {
+                throw new ArgumentNullException(paramName: _encryptionKey);
+            }
+
+            if (string.IsNullOrEmpty(_encryptionIV))
+            {
+                throw new ArgumentNullException(paramName: _encryptionIV);
+            }
+
+            byte[] plainBytes = null;
+
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.BlockSize = 128;
+                aesAlg.KeySize = 256;
+                aesAlg.Padding = PaddingMode.PKCS7;
+                aesAlg.Mode = CipherMode.CBC;
+                aesAlg.Key = Convert.FromBase64String(_encryptionKey);
+                aesAlg.IV = Convert.FromBase64String(_encryptionIV);
+
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+                using MemoryStream msDecrypt = new MemoryStream(cipherBytes);
+                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                {
+                    csDecrypt.Read(cipherBytes, 0, cipherBytes.Length);
+                }
+
+                plainBytes = msDecrypt.ToArray();
+            }
+
+            return plainBytes;
+        }
+
+        byte[] IAESCryptography.Encrypt(byte[] plainBytes)
+        {
+            if (string.IsNullOrEmpty(_encryptionKey))
+            {
+                throw new ArgumentNullException(paramName: _encryptionKey);
+            }
+
+            if (string.IsNullOrEmpty(_encryptionIV))
+            {
+                throw new ArgumentNullException(paramName: _encryptionIV);
+            }
+
+            byte[] encrypted;
+
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.BlockSize = 128;
+                aesAlg.KeySize = 256;
+                aesAlg.Padding = PaddingMode.PKCS7;
+                aesAlg.Mode = CipherMode.CBC;
+                aesAlg.Key = Convert.FromBase64String(_encryptionKey);
+                aesAlg.IV = Convert.FromBase64String(_encryptionIV);
+
+                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+                using MemoryStream msEncrypt = new MemoryStream();
+                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                {
+                    csEncrypt.Write(plainBytes, 0, plainBytes.Length);
+                }
+
+                encrypted = msEncrypt.ToArray();
+            }
+
+            return encrypted;
+        }
     }
 }

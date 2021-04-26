@@ -22,15 +22,17 @@ using System;
 using Elyon.Fastly.EmailJob.PostgresRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
 {
     [DbContext(typeof(EmailJobContext))]
-    partial class EmailJobContextModelSnapshot : ModelSnapshot
+    [Migration("20210420084844_AddAttachmentsTables")]
+    partial class AddAttachmentsTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,9 +69,6 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("CcReceivers")
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp without time zone");

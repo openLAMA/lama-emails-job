@@ -49,17 +49,16 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                 connString => new EmailJobContext(connString, false), 
                 dbConn => new EmailJobContext(dbConn));
 
-            builder.Register(ctx => new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new AutoMapperProfile(ctx.Resolve<IAESCryptography>()));
-            }));
-
             builder.RegisterType<EmailTemplatesRepository>()
                 .As<IEmailTemplatesRepository>()
                 .SingleInstance();
 
             builder.RegisterType<EmailsRepository>()
                 .As<IEmailsRepository>()
+                .SingleInstance();
+
+            builder.RegisterType<AttachmentsRepository>()
+                .As<IAttachmentsRepository>()
                 .SingleInstance();
 
             builder.RegisterType<AESCryptography>()

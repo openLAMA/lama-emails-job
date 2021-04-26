@@ -35,6 +35,10 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
 
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
 
+        public DbSet<Attachment> Attachments { get; set; }
+
+        public DbSet<EmailAttachment> EmailAttachments { get; set; }
+
         public EmailJobContext() : base(Schema)
         {
         }
@@ -70,6 +74,11 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
             modelBuilder.Entity<EmailTemplate>()
                 .HasMany(et => et.Emails)
                 .WithOne(u => u.Template);
+
+            modelBuilder.Entity<Email>()
+                .HasMany(e => e.Attachments)
+                .WithOne(u => u.Email)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

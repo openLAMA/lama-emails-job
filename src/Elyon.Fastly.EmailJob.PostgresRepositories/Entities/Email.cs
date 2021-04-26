@@ -36,6 +36,8 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Entities
         [MaxLength(100)]
         public string Receiver { get; set; }
 
+        public string CcReceivers { get; set; }
+
         [Required]
         public bool IsProcessed { get; set; }
 
@@ -50,6 +52,8 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Entities
 
 #pragma warning disable CA2227 // Collection properties should be read only
         public virtual ICollection<EmailParameter> Parameters { get; set; }
+
+        public virtual ICollection<EmailAttachment> Attachments { get; set; }
 #pragma warning restore CA2227 // Collection properties should be read only
     }
 }

@@ -17,14 +17,21 @@
 // along with this program.  If not, see https://www.gnu.org/licenses/.
 #endregion
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Elyon.Fastly.EmailJob.Domain.Dtos;
+using System;
+using System.ComponentModel.DataAnnotations;
 
-namespace Elyon.Fastly.EmailJob.DomainServices.Mail
+namespace Elyon.Fastly.EmailJob.PostgresRepositories.Entities
 {
-    public interface IMailSenderService
+    public class EmailAttachment: BaseEntityWithId
     {
-        public Task SendMessageAsync(string receiver, string ccReceivers, string subject, string body, ICollection<AttachmentDto> attachments);
+        [Required]
+        public Guid EmailId { get; set; }
+
+        public virtual Email Email { get; set; }
+
+        [Required]
+        public Guid AttachmentId { get; set; }
+
+        public virtual Attachment Attachment { get; set; }
     }
 }

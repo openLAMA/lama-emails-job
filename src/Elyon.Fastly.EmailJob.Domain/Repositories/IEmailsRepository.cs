@@ -26,7 +26,7 @@ namespace Elyon.Fastly.EmailJob.Domain.Repositories
 {
     public interface IEmailsRepository : IBaseRepository
     {
-        Task<Guid> AddEmailToQueueAsync(string receiver, string templateName, Dictionary<string, string> parameters);
+        Task<Guid> AddEmailToQueueAsync(string receiver, IEnumerable<string> ccReceivers, string templateName, IEnumerable<Guid> attachmentsIds, Dictionary<string, string> parameters);
 
         Task<ICollection<EmailDto>> GetUnsentEmailsAsync();
 

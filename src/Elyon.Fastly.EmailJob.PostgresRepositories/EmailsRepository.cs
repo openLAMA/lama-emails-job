@@ -42,7 +42,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
             _aesCryptography = aesCryptography;
         }
 
-        public async Task<Guid> AddEmailToQueueAsync(string receiver, string templateName, Dictionary<string, string> parameters)
+        public async Task<Guid> AddEmailToQueueAsync(string receiver, IEnumerable<string> ccReceivers, string templateName, IEnumerable<Guid> attachmentsIds, Dictionary<string, string> parameters)
         {
             if (receiver == null)
                 throw new ArgumentNullException(nameof(receiver));
@@ -59,7 +59,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                 .Select(t => t.Id)
                 .FirstAsync()
                 .ConfigureAwait(false);
-            
+                        
             var items = context.Set<Email>();
             var entity = new Email
             {
@@ -67,6 +67,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                 CreatedOn = DateTime.UtcNow,
                 IsProcessed = false,
                 Receiver = _aesCryptography.Encrypt(receiver),
+                CcReceivers = ccReceivers != default ? _aesCryptography.Encrypt(string.Join(";", ccReceivers)) : default,
                 TemplateId = templateId
             };
 
@@ -79,6 +80,20 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                     ParamName = param.Key,
                     ParamContent = _aesCryptography.Encrypt(param.Value)
                 });
+
+            if (attachmentsIds != default && attachmentsIds.Any())
+            {
+                entity.Attachments = new List<EmailAttachment>();
+                foreach (var attachmentId in attachmentsIds)
+                {
+                    entity.Attachments.Add(new EmailAttachment
+                    {
+                        Id = Guid.NewGuid(),
+                        AttachmentId = attachmentId,
+                        Email = entity
+                    });
+                }
+            }
 
 
             await items.AddAsync(entity).ConfigureAwait(false);
@@ -101,6 +116,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                 {
                     Id = entity.Id,
                     Receiver = _aesCryptography.Decrypt(entity.Receiver),
+                    CcReceivers = _aesCryptography.Decrypt(entity.CcReceivers),
                     TemplateName = entity.Template.Name
                 })
                 .ToListAsync()
@@ -113,7 +129,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                 .Where(et => templatesToDownload.Contains(et.Name))
                 .ToDictionaryAsync(et => et.Name, et => Tuple.Create(et.Subject, et.Content))
                 .ConfigureAwait(false);
-            // Populate the templates content and passed parameters
+            // Populate the templates content, passed parameters and attachments
             foreach (var email in emails)
             {
                 email.Subject = templatesContent[email.TemplateName].Item1;
@@ -122,6 +138,18 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                     .AsNoTracking()
                     .Where(ep => ep.EmailId == email.Id)
                     .ToDictionaryAsync(ep => ep.ParamName, ep => _aesCryptography.Decrypt(ep.ParamContent))
+                    .ConfigureAwait(false);
+
+                email.Attachments = await context.Set<EmailAttachment>()
+                    .Include(ea => ea.Attachment)
+                    .AsNoTracking()
+                    .Where(ea => ea.EmailId == email.Id)
+                    .Select(ea => new AttachmentDto 
+                    {
+                        Content = _aesCryptography.Decrypt(ea.Attachment.Content),
+                        FileName = ea.Attachment.FileName
+                    })
+                    .ToListAsync()
                     .ConfigureAwait(false);
             }
 

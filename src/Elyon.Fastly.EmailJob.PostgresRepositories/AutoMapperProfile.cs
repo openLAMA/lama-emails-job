@@ -17,6 +17,7 @@
 // along with this program.  If not, see https://www.gnu.org/licenses/.
 #endregion
 
+using System;
 using AutoMapper;
 using Elyon.Fastly.EmailJob.Domain.Dtos;
 using Elyon.Fastly.EmailJob.Domain.Services;
@@ -35,6 +36,12 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
             CreateMap<EmailTemplate, EmailTemplateDto>();
             CreateMap<EmailTemplateDto, EmailTemplate>()
                 .ForMember(source => source.Emails, opt => opt.Ignore());
+
+            CreateMap<InsertFileDto, Attachment>()
+                .ForMember(dest => dest.Content, opt => opt.MapFrom(src => _aESCryptography.Encrypt(src.Content)));
+            CreateMap<Attachment, FileInfoDto>()
+                .ForMember(dest => dest.FileHash, opt => opt.MapFrom(src => src.OriginalXXHash))
+                .ForMember(dest => dest.Content, opt => opt.MapFrom(src => Convert.ToBase64String(_aESCryptography.Decrypt(src.Content))));
         }
     }
 }

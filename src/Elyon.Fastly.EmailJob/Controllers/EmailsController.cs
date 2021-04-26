@@ -54,7 +54,7 @@ namespace Elyon.Fastly.EmailJob.Controllers
                 throw new ArgumentNullException(nameof(email));
 
             await _emailsService
-                .SendEmail(email.Receiver, email.TemplateName, email.Parameters)
+                .SendEmail(email.Receiver, email.CcReceivers, email.TemplateName, email.AttachmentFilesHashes, email.Parameters)
                 .ConfigureAwait(false);
         }
     }

@@ -17,14 +17,28 @@
 // along with this program.  If not, see https://www.gnu.org/licenses/.
 #endregion
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Elyon.Fastly.EmailJob.Domain.Dtos;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Elyon.Fastly.EmailJob.DomainServices.Mail
+namespace Elyon.Fastly.EmailJob.PostgresRepositories.Migrations
 {
-    public interface IMailSenderService
+    public partial class AddEmailCcReceivers : Migration
     {
-        public Task SendMessageAsync(string receiver, string ccReceivers, string subject, string body, ICollection<AttachmentDto> attachments);
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "CcReceivers",
+                schema: "EmailJobSchema",
+                table: "Emails",
+                type: "text",
+                nullable: true);
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "CcReceivers",
+                schema: "EmailJobSchema",
+                table: "Emails");
+        }
     }
 }

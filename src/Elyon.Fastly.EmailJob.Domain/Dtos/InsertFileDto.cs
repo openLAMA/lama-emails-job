@@ -17,14 +17,16 @@
 // along with this program.  If not, see https://www.gnu.org/licenses/.
 #endregion
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Elyon.Fastly.EmailJob.Domain.Dtos;
-
-namespace Elyon.Fastly.EmailJob.DomainServices.Mail
+namespace Elyon.Fastly.EmailJob.Domain.Dtos
 {
-    public interface IMailSenderService
+    public class InsertFileDto : BaseDtoWithId
     {
-        public Task SendMessageAsync(string receiver, string ccReceivers, string subject, string body, ICollection<AttachmentDto> attachments);
+        public string FileName { get; set; }
+
+#pragma warning disable CA1819 // Properties should not return arrays
+        public byte[] Content { get; set; }
+#pragma warning restore CA1819 // Properties should not return arrays
+
+        public string OriginalXXHash { get; set; }
     }
 }

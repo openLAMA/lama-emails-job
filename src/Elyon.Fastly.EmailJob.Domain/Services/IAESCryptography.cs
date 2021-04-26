@@ -24,5 +24,9 @@ namespace Elyon.Fastly.EmailJob.Domain.Services
         string Decrypt(string cipherText);
 
         string Encrypt(string plainText);
+
+        byte[] Decrypt(byte[] cipherBytes);
+
+        byte[] Encrypt(byte[] plainBytes);
     }
 }
