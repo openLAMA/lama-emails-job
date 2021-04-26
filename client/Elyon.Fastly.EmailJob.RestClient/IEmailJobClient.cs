@@ -35,6 +35,7 @@ namespace Elyon.Fastly.EmailJob.RestClient
         /// <summary>Emails Api</summary>
         IEmailsApi EmailsApi { get; }
 
+        /// <summary>Storage Api</summary>
         IStorageApi StorageApi { get; }
     }
 }
