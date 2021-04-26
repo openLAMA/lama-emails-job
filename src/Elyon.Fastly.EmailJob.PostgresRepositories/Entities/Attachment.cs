@@ -23,7 +23,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Entities
 {
     public class Attachment: BaseEntityWithId
     {
-        [Required]
+        [Required, MaxLength(200)]
         public string FileName { get; set; }
 
 #pragma warning disable CA1819 // Properties should not return arrays
@@ -31,7 +31,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories.Entities
         public byte[] Content { get; set; }
 #pragma warning restore CA1819 // Properties should not return arrays
 
-        [Required]
+        [Required, MaxLength(200)]
         public string OriginalXXHash { get; set; }
     }
 }
