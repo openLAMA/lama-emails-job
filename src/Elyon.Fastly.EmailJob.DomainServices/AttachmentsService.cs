@@ -38,23 +38,36 @@ namespace Elyon.Fastly.EmailJob.DomainServices
             _xxHashInstance = xxHashFactory.Instance.Create();
         }
 
-        public async Task<bool> CheckIfFileExists(string content)
+        public async Task<string> GetFileHash(string content)
         {
             var fileHash = _xxHashInstance.ComputeHash(Convert.FromBase64String(content)).AsBase64String();
             var fileId = await _repository.GetAttachmentIdByHash(fileHash).ConfigureAwait(false);
-            return fileId != default(Guid);
+            if (fileId != default(Guid))
+            {
+                return fileHash;
+            }
+
+            return null;
         }
 
-        public async Task AddFileAsync(string fileName, string content)
+        public async Task<string> AddFileAsync(string fileName, string content)
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentNullException(nameof(fileName));
             if (string.IsNullOrWhiteSpace(content))
                 throw new ArgumentNullException(nameof(content));
 
+            var existingFileHash = await GetFileHash(content)
+                .ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(existingFileHash))
+            {
+                return existingFileHash;
+            }
+
             var fileContent = Convert.FromBase64String(content);
             var fileHash = _xxHashInstance.ComputeHash(fileContent).AsBase64String();
-            await _repository
+            return await _repository
                 .AddAttachment(new InsertFileDto
                 { 
                     FileName = fileName,

@@ -64,7 +64,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<Guid> AddAttachment(InsertFileDto dto)
+        public async Task<string> AddAttachment(InsertFileDto dto)
         {
             await using var context = ContextFactory.CreateDataContext();
 
@@ -77,7 +77,7 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
 
             context.Entry(entity).State = EntityState.Detached;
 
-            return entity.Id;
+            return entity.OriginalXXHash;
         }
 
         public async Task<FileInfoDto> GetFileAsync(string hash)

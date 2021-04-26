@@ -28,7 +28,7 @@ namespace Elyon.Fastly.EmailJob.Domain.Repositories
     {
         Task<Guid> GetAttachmentIdByHash(string xxHash);
 
-        Task<Guid> AddAttachment(InsertFileDto dto);
+        Task<string> AddAttachment(InsertFileDto dto);
 
         Task<FileInfoDto> GetFileAsync(string hash);
 

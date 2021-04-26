@@ -35,8 +35,9 @@ namespace Elyon.Fastly.EmailJob.RestClient.Api
         /// Add file to the storage
         /// </summary>
         /// <param name="file">The file to be added to the storage</param>
+        /// <returns>Hash of the file</returns>
         [Post("/api/storage")]
-        Task AddFileAsync(FileSpecModel file);
+        Task<string> AddFileAsync(FileSpecModel file);
 
         /// <summary>
         /// Get file from storage

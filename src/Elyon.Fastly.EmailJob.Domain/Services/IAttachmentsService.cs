@@ -27,9 +27,9 @@ namespace Elyon.Fastly.EmailJob.Domain.Services
 {
     public interface IAttachmentsService : IBaseService
     {
-        Task AddFileAsync(string fileName, string content);
+        Task<string> AddFileAsync(string fileName, string content);
 
-        Task<bool> CheckIfFileExists(string content);
+        Task<string> GetFileHash(string content);
 
         Task<FileInfoDto> GetFileAsync(string hash);
 

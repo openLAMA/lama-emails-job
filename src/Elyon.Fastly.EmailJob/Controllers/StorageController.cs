@@ -42,21 +42,14 @@ namespace Elyon.Fastly.EmailJob.Controllers
         }
 
         [HttpPost]
-        public async Task AddFileAsync(FileSpecModel file)
+        public async Task<string> AddFileAsync(FileSpecModel file)
         {
             if (file == null)
                 throw new ArgumentNullException(nameof(file));
 
-            var doesFileExist = await _storageService
-                .CheckIfFileExists(file.Content)
-                .ConfigureAwait(false);
-
-            if (!doesFileExist)
-            {
-                await _storageService
-                .AddFileAsync(file.FileName, file.Content)
-                .ConfigureAwait(false);
-            }
+            return await _storageService
+            .AddFileAsync(file.FileName, file.Content)
+            .ConfigureAwait(false);
         }
 
         [HttpGet("{hash}")]
