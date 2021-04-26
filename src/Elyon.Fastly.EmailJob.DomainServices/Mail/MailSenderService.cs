@@ -62,6 +62,20 @@ namespace Elyon.Fastly.EmailJob.DomainServices.Mail
                 }
             }
 
+            /* 
+                Fix for unicode or long filenames
+                https://github.com/jstedfast/MimeKit/blob/master/FAQ.md#UntitledAttachments
+                https://stackoverflow.com/questions/57868704/mimekit-howto-base64-encode-attachment-filenames 
+            */
+            foreach (var attachment in bodyBuilder.Attachments)
+            {
+                foreach (var parameter in attachment.ContentType.Parameters)
+                    parameter.EncodingMethod = ParameterEncodingMethod.Rfc2047;
+
+                foreach (var parameter in attachment.ContentDisposition.Parameters)
+                    parameter.EncodingMethod = ParameterEncodingMethod.Rfc2047;
+            }
+
             message.Body = bodyBuilder.ToMessageBody();
 
             using (var mailClient = _mailClientFactory.CreateMailClient())

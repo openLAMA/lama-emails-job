@@ -18,9 +18,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Elyon.Fastly.EmailJob.Domain.Dtos;
 using Elyon.Fastly.EmailJob.Domain.Repositories;
 using Elyon.Fastly.EmailJob.Domain.Services;
 using Elyon.Fastly.EmailJob.PostgresRepositories.Entities;
@@ -43,35 +45,32 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
         public async Task<Guid> GetAttachmentIdByHash(string xxHash)
         {
             await using var context = ContextFactory.CreateDataContext();
-            var attachmentId = await context.Set<Attachment>()
+            return await context.Set<Attachment>()
                 .AsNoTracking()
                 .Where(a => a.OriginalXXHash == xxHash)
                 .Select(a => a.Id)
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
-
-            return attachmentId;
         }
 
-        public async Task<Guid> AddAttachment(string fileName, byte[] content, string xxHash)
+        public async Task<List<Guid>> GetAttachmentsIds(ICollection<string> xxHashes)
         {
-            if (fileName == null)
-                throw new ArgumentNullException(nameof(fileName));
-            if (!content.Any())
-                throw new ArgumentNullException(nameof(content));
-            if (xxHash == null)
-                throw new ArgumentNullException(nameof(xxHash));
+            await using var context = ContextFactory.CreateDataContext();
+            return await context.Set<Attachment>()
+                .AsNoTracking()
+                .Where(a => xxHashes.Contains(a.OriginalXXHash))
+                .Select(a => a.Id)
+                .ToListAsync()
+                .ConfigureAwait(false);
+        }
 
+        public async Task<Guid> AddAttachment(InsertFileDto dto)
+        {
             await using var context = ContextFactory.CreateDataContext();
 
             var items = context.Set<Attachment>();
-            var entity = new Attachment()
-            {
-                Id = Guid.NewGuid(),
-                FileName = fileName,
-                Content = _aesCryptography.Encrypt(content),
-                OriginalXXHash = xxHash
-            };
+            var entity = Mapper.Map<InsertFileDto, Attachment>(dto);
+            entity.Id = Guid.NewGuid();
 
             await items.AddAsync(entity).ConfigureAwait(false);
             await context.SaveChangesAsync().ConfigureAwait(false);
@@ -79,6 +78,45 @@ namespace Elyon.Fastly.EmailJob.PostgresRepositories
             context.Entry(entity).State = EntityState.Detached;
 
             return entity.Id;
+        }
+
+        public async Task<FileInfoDto> GetFileAsync(string hash)
+        {
+            await using var context = ContextFactory.CreateDataContext();
+            var entity = await context.Set<Attachment>()
+                .AsNoTracking()
+                .Where(a => a.OriginalXXHash == hash)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            return Mapper.Map<FileInfoDto>(entity);
+        }
+
+        public async Task<List<FileInfoDto>> GetFilesAsync()
+        {
+            await using var context = ContextFactory.CreateDataContext();
+            var entities = await context.Set<Attachment>()
+                .AsNoTracking()
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            return Mapper.Map<List<FileInfoDto>>(entities);
+        }
+
+        public async Task DeleteFileAsync(string hash)
+        {
+            await using var context = ContextFactory.CreateDataContext();
+            var items = context.Set<Attachment>();
+            var entity = await items
+                .Where(a => a.OriginalXXHash == hash)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (entity != null)
+            {
+                items.Remove(entity);
+                await context.SaveChangesAsync().ConfigureAwait(false);
+            }
         }
     }
 }

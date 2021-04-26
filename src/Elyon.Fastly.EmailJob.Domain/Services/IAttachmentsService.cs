@@ -21,11 +21,22 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Elyon.Fastly.EmailJob.Domain.Dtos;
 
 namespace Elyon.Fastly.EmailJob.Domain.Services
 {
     public interface IAttachmentsService : IBaseService
     {
-        Task<List<Guid>> GetAttachmentsIds(string attachmentsType);
+        Task AddFileAsync(string fileName, string content);
+
+        Task<bool> CheckIfFileExists(string content);
+
+        Task<FileInfoDto> GetFileAsync(string hash);
+
+        Task<List<FileInfoDto>> GetFilesAsync();
+
+        Task DeleteFileAsync(string hash);
+
+        Task<List<Guid>> GetAttachmentsIds(ICollection<string> attachmentFilesHashes);
     }
 }

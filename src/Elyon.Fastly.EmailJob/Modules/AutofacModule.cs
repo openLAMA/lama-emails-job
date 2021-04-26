@@ -48,6 +48,12 @@ namespace Elyon.Fastly.EmailJob.Modules
                 .As<IMapper>()
                 .InstancePerLifetimeScope();
 
+            builder.Register(ctx => new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(typeof(AutoMapperProfile));
+                cfg.AddProfile(new PostgresRepositories.AutoMapperProfile(ctx.Resolve<IAESCryptography>()));
+            }));
+
             var mapper = new MapperConfiguration(c => c.AddProfile(typeof(AutoMapperProfile)))
                 .CreateMapper();
 

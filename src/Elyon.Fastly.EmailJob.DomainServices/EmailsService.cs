@@ -59,13 +59,18 @@ namespace Elyon.Fastly.EmailJob.DomainServices
                 .ConfigureAwait(false);
         }
 
-        public async Task SendEmail(string receiver, IEnumerable<string> ccReceivers, string templateName, string attachmentsType, Dictionary<string, string> parameters)
+        public async Task SendEmail(string receiver, ICollection<string> ccReceivers, string templateName, ICollection<string> attachmentFilesHashes, Dictionary<string, string> parameters)
         {
             var attachmentsIds = new List<Guid>();
-            if (!string.IsNullOrWhiteSpace(attachmentsType))
+            if (attachmentFilesHashes != default && attachmentFilesHashes.Any())
             {
-                _log.Info($"Get attachmentsIds for attachment type \"{attachmentsType}\", template \"{templateName}\"");
-                attachmentsIds = await _attachmentsService.GetAttachmentsIds(attachmentsType).ConfigureAwait(false);
+                _log.Info($"Get attachmentsIds for attachment files \"{string.Join(", ", attachmentFilesHashes)}\", template \"{templateName}\"");
+                attachmentsIds = await _attachmentsService.GetAttachmentsIds(attachmentFilesHashes).ConfigureAwait(false);
+                if (attachmentFilesHashes.Count != attachmentsIds.Count)
+                {
+                    _log.Error($"Email not added to queue - not all attachments have been found in the DB. Attachments files hashes count: {attachmentFilesHashes.Count}, files in DB count: {attachmentsIds.Count}");
+                    return;
+                }
             }
 
             _log.Info($"New email queued for send with template \"{templateName}\"");

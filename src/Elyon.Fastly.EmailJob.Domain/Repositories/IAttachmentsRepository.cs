@@ -18,13 +18,24 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Elyon.Fastly.EmailJob.Domain.Dtos;
 
 namespace Elyon.Fastly.EmailJob.Domain.Repositories
 {
     public interface IAttachmentsRepository : IBaseRepository
     {
         Task<Guid> GetAttachmentIdByHash(string xxHash);
-        Task<Guid> AddAttachment(string fileName, byte[] content, string xxHash);
+
+        Task<Guid> AddAttachment(InsertFileDto dto);
+
+        Task<FileInfoDto> GetFileAsync(string hash);
+
+        Task<List<FileInfoDto>> GetFilesAsync();
+
+        Task DeleteFileAsync(string hash);
+
+        Task<List<Guid>> GetAttachmentsIds(ICollection<string> xxHashes);
     }
 }

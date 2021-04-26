@@ -21,10 +21,9 @@ using System;
 using System.Collections.Generic;
 using System.Data.HashFunction.xxHash;
 using System.Threading.Tasks;
-using Elyon.Fastly.EmailJob.Domain.Enums;
+using Elyon.Fastly.EmailJob.Domain.Dtos;
 using Elyon.Fastly.EmailJob.Domain.Repositories;
 using Elyon.Fastly.EmailJob.Domain.Services;
-using Elyon.Fastly.EmailJob.DomainServices.AttachmentFiles;
 
 namespace Elyon.Fastly.EmailJob.DomainServices
 {
@@ -39,30 +38,58 @@ namespace Elyon.Fastly.EmailJob.DomainServices
             _xxHashInstance = xxHashFactory.Instance.Create();
         }
 
-        public async Task<List<Guid>> GetAttachmentsIds(string attachmentsType)
+        public async Task<bool> CheckIfFileExists(string content)
         {
-            List<Guid> attachmentsIds = new List<Guid>();
-            var attachmentsByType = new List<AttachmentData>();
-            if (attachmentsType == Enum.GetName(typeof(AttachmentType), AttachmentType.CompanyOnboarding) || 
-                attachmentsType == Enum.GetName(typeof(AttachmentType), AttachmentType.SMEOnboarding))
-            {
-                attachmentsByType = AttachmentsByTypes.CompanyOnboarding();
+            var fileHash = _xxHashInstance.ComputeHash(Convert.FromBase64String(content)).AsBase64String();
+            var fileId = await _repository.GetAttachmentIdByHash(fileHash).ConfigureAwait(false);
+            return fileId != default(Guid);
+        }
 
-            }
+        public async Task AddFileAsync(string fileName, string content)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentNullException(nameof(fileName));
+            if (string.IsNullOrWhiteSpace(content))
+                throw new ArgumentNullException(nameof(content));
 
-            foreach (var file in attachmentsByType)
-            {
-                var fileHash = _xxHashInstance.ComputeHash(file.GetContent()).AsBase64String();
-                var attachmentId = await _repository.GetAttachmentIdByHash(fileHash).ConfigureAwait(false);
-                if (attachmentId == default(Guid))
-                {
-                    attachmentId = await _repository.AddAttachment(file.FileName, file.GetContent(), fileHash).ConfigureAwait(false);
-                }
+            var fileContent = Convert.FromBase64String(content);
+            var fileHash = _xxHashInstance.ComputeHash(fileContent).AsBase64String();
+            await _repository
+                .AddAttachment(new InsertFileDto
+                { 
+                    FileName = fileName,
+                    Content = fileContent,
+                    OriginalXXHash = fileHash
+                })
+                .ConfigureAwait(false);
+        }
 
-                attachmentsIds.Add(attachmentId);
-            }
+        public async Task<FileInfoDto> GetFileAsync(string hash)
+        {
+            return await _repository
+                .GetFileAsync(hash)
+                .ConfigureAwait(false);
+        }
 
-            return attachmentsIds;
+        public async Task<List<FileInfoDto>> GetFilesAsync()
+        {
+            return await _repository
+                .GetFilesAsync()
+                .ConfigureAwait(false);
+        }
+
+        public async Task DeleteFileAsync(string hash)
+        {
+            await _repository
+                .DeleteFileAsync(hash)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<List<Guid>> GetAttachmentsIds(ICollection<string> attachmentFilesHashes)
+        {
+            return await _repository
+                .GetAttachmentsIds(attachmentFilesHashes)
+                .ConfigureAwait(false);
         }
     }
 }
